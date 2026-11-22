@@ -1,0 +1,47 @@
+plugins {
+    id 'fabric-loom' version '1.17.17'
+}
+
+group = 're.effects'
+version = '1.0.1'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://api.modrinth.com/maven' }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        fb_inventory_view {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:1.21.11'
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.19.5'
+    modRuntimeOnly 'net.fabricmc.fabric-api:fabric-api:0.141.6+1.21.11'
+    def flashbackJar = providers.gradleProperty('flashback_jar').orNull
+    modImplementation(flashbackJar ? files(flashbackJar) : "maven.modrinth:flashback:${flashback_id}")
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand(version: project.version)
+    }
+}

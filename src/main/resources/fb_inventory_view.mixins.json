@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "package": "re.effects.fbinv.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "RecorderMixin",
+    "ReplayReaderMixin",
+    "ReplayServerMixin",
+    "StartExportMixin",
+    "ExportJobMixin",
+    "MinecraftMixin",
+    "SurvivalScreenMixin",
+    "CreativeScreenMixin",
+    "EffectsMixin",
+    "CreativeAccess",
+    "BookAccess",
+    "BookMixin",
+    "PageAccess",
+    "SurvivalAccess"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

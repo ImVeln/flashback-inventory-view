@@ -1,0 +1,43 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.util.zip.ZipFile
+
+gradle.afterProject { p ->
+    if (p.name != 'flashback-inventory-view') return
+
+    def fb = p.providers.gradleProperty('flashback_jar').orNull
+    if (fb == null || !p.file(fb).isFile()) {
+        throw new GradleException('Pass -Pflashback_jar with the original Flashback 0.39.9 JAR')
+    }
+
+    def deps = p.file('.work/replay-deps')
+    deps.mkdirs()
+    new ZipFile(p.file(fb)).withCloseable { zip ->
+        zip.entries().findAll { it.name.startsWith('META-INF/jars/') && it.name.endsWith('.jar') }.each { entry ->
+            def jar = new File(deps, entry.name.substring(entry.name.lastIndexOf('/') + 1))
+            jar.withOutputStream { out -> zip.getInputStream(entry).withCloseable { it.transferTo(out) } }
+            p.dependencies.add('modRuntimeOnly', p.files(jar))
+        }
+    }
+
+    p.dependencies.add('modImplementation', 'net.fabricmc.fabric-api:fabric-api:0.141.6+1.21.11')
+    p.sourceSets.client.java.srcDir('tests/java')
+    p.loom.runs.named('client') {
+        runDir '.work/replay-test'
+    }
+    def run = p.file('.work/replay-test')
+    run.mkdirs()
+    def opts = new File(run, 'options.txt')
+    if (!opts.exists()) {
+        opts.text = 'onboardAccessibility:false\npauseOnLostFocus:false\n'
+    }
+    p.tasks.named('processResources') {
+        outputs.upToDateWhen { false }
+        doLast {
+            def file = new File(destinationDir, 'fabric.mod.json')
+            def mod = new JsonSlurper().parse(file)
+            mod.entrypoints.client.add('re.effects.fbinv.ReplaySmoke')
+            file.text = JsonOutput.toJson(mod)
+        }
+    }
+}

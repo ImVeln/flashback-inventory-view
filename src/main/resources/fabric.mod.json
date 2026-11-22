@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "fb_inventory_view",
+  "version": "${version}",
+  "name": "Flashback Inventory View",
+  "description": "Records and displays the recording player's inventory in Flashback replays.",
+  "icon": "assets/fb_inventory_view/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["re.effects.fbinv.FbInv"]
+  },
+  "mixins": ["fb_inventory_view.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "flashback": "0.39.9"
+  }
+}
